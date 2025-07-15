@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>E-Shop | Home</title>
+  <link rel="stylesheet" href="home.css" />
+</head>
+
+<body>
+
+  <header>
+    <div class="navbar">
+      <div class="logo">E-Shop</div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search products..." />
+      </div>
+
+      <nav class="nav-links">
+
+      <a href="#" class="nav-link active">Home</a>
+      <a href="cart.html" class="nav-link">Cart</a>
+      <a href="#" id="myOrdersBtn" class="nav-link">My Orders</a>
+      <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+
+        <span class="nav-indicator"></span>
+      </nav>
+    </div>
+  </header>
+
+  <section class="products">
+    <h2>All Products</h2>
+    <div class="product-grid" id="productGrid">
+      <!-- All products go here -->
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 E-Shop. All rights reserved.</p>
+  </footer>
+
+  
+  <script>
+    const links = document.querySelectorAll(".nav-link");
+    const indicator = document.querySelector(".nav-indicator");
+
+    function updateIndicator(el) {
+      const rect = el.getBoundingClientRect();
+      const navRect = el.parentElement.getBoundingClientRect();
+      indicator.style.width = `${rect.width}px`;
+      indicator.style.left = `${rect.left - navRect.left}px`;
+    }
+
+    links.forEach(link => {
+      link.addEventListener("click", function () {
+        links.forEach(l => l.classList.remove("active"));
+        this.classList.add("active");
+        updateIndicator(this);
+      });
+    });
+
+    window.addEventListener("load", () => {
+      const active = document.querySelector(".nav-link.active");
+      if (active) updateIndicator(active);
+      loadProducts();
+    });
+
+    window.addEventListener("resize", () => {
+      const active = document.querySelector(".nav-link.active");
+      if (active) updateIndicator(active);
+    });
+
+    let allProducts = [];
+
+    async function loadProducts() {
+      const container = document.getElementById("productGrid");
+      container.innerHTML = "Loading...";
+
+      try {
+        const res = await fetch("/api/products");
+        allProducts = await res.json();
+        displayProducts(allProducts);
+      } catch (err) {
+        container.innerHTML = "Failed to load products.";
+        console.error(err);
+      }
+    }
+
+    function displayProducts(products) {
+      const container = document.getElementById("productGrid");
+      container.innerHTML = "";
+
+      if (!products.length) {
+        container.innerHTML = "<p>No matching products found.</p>";
+        return;
+      }
+
+      products.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        card.innerHTML = `
+          <a href="product.html?id=${product._id}" style="text-decoration: none; color: inherit;">
+            <img src="${product.image}" alt="${product.name}" />
+            <h3>${product.name}</h3>
+            <p style="margin: 0.5rem 0;"><strong>₹${product.price}</strong></p>
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Live search
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const keyword = e.target.value.toLowerCase();
+      const filtered = allProducts.filter(product =>
+        product.name.toLowerCase().includes(keyword)
+      );
+      displayProducts(filtered);
+    });
+
+    // ✅ Cart button logic (Protected)
+document.querySelector('.nav-links a[href="cart.html"]').addEventListener("click", (e) => {
+  e.preventDefault(); // prevent direct navigation
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first to access your cart.");
+    window.location.href = "auth.html";
+  } else {
+    window.location.href = "cart.html";
+  }
+});
+
+
+    // ✅ My Orders button logic
+document.getElementById("myOrdersBtn").addEventListener("click", () => {
+  window.location.href = "myorders.html"; // This page will show user orders
+});
+
+// ✅ Logout button logic
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("token"); // Remove JWT
+  window.location.href = "auth.html"; // Redirect to login page
+});
+
+  </script>
+
+  <script>
+  // Capture token and name from Google redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  const name = urlParams.get('name');
+
+  if (token) {
+    localStorage.setItem("token", token);
+    localStorage.setItem("name", name || "User");
+
+    // Clean URL (remove query string)
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+</script>
+
+</body>
+</html>

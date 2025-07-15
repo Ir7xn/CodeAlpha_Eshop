@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MyShop</title>
+  <link rel="stylesheet" href="/css/home.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">MyShop</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/products">Products</a>
+      <a href="/my-orders">My Orders</a>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Welcome to MyShop</h1>
+    <p>Your one-stop destination for all things awesome!</p>
+    <a href="/products" class="btn">Shop Now</a>
+  </section>
+
+  <section class="products">
+    <h2>Featured Products</h2>
+    <div class="product-grid">
+      <% products.forEach(product => { %>
+        <div class="product-card">
+          <h3><%= product.name %></h3>
+          <p><%= product.description %></p>
+          <p><strong>₹<%= product.price %></strong></p>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <footer>
+    &copy; <%= new Date().getFullYear() %> MyShop. All rights reserved.
+  </footer>
+</body>
+</html>

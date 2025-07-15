@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Authentication</title>
+  <link rel="stylesheet" href="style.css" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="auth-container">
+  <h1 class="page-heading">🛒 E-Shop</h1>
+
+
+
+  <!-- Flip Card -->
+  <div class="flip-wrapper">
+    <div class="flip-container" id="flip-container">
+      <div class="flipper">
+
+        <!-- FRONT (Login Panel) -->
+        <div class="front auth-panel">
+          <h2>🔐 Login to Your Account</h2>
+          <div id="messageBox" class="hidden"></div>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <input type="email" id="loginEmail" placeholder=" " required />
+              <label for="loginEmail">Email</label>
+            </div>
+
+            <div class="form-group">
+              <input type="password" id="loginPassword" placeholder=" " required />
+              <label for="loginPassword">Password</label>
+            </div>
+
+            <button type="submit" class="secondary-btn">Login</button>
+
+            <div class="social-icons">
+              <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Login" id="googleLoginIcon" />
+            </div>
+          </form>
+
+          <p>Don't have an account? <a href="#" onclick="flipCard()">Register here</a></p>
+        </div>
+
+        <!-- BACK (Signup Panel) -->
+        <div class="back auth-panel">
+          <h2>📝 Create Your Account</h2>
+          <div id="messageBoxSignup" class="hidden"></div>
+
+          <form id="signupForm">
+            <div class="form-group">
+              <input type="text" id="name" placeholder=" " required />
+              <label for="name">Full Name</label>
+            </div>
+
+            <div class="otp-row">
+              <div class="form-group" style="flex: 2;">
+                <input type="email" id="email" placeholder=" " required />
+                <label for="email">Email Address</label>
+              </div>
+              <button type="button" id="sendOtp" class="secondary-btn">Send OTP</button>
+            </div>
+
+            <div class="form-group">
+              <input type="text" id="otp" placeholder=" " required />
+              <label for="otp">Enter OTP</label>
+            </div>
+
+            <div class="form-group">
+              <input type="date" id="dob" placeholder=" " required />
+              <label for="dob">Date of Birth</label>
+            </div>
+
+            <div class="form-group">
+              <input type="password" id="password" placeholder=" " required />
+              <label for="password">New Password</label>
+            </div>
+
+            <div class="form-group">
+              <input type="password" id="confirmPassword" placeholder=" " required />
+              <label for="confirmPassword">Confirm Password</label>
+            </div>
+
+            <button type="submit" class="secondary-btn">Register</button>
+          </form>
+
+          <p>Already have an account? <a href="#" onclick="flipCard()">Login here</a></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+
+
+  <!-- Flip Logic -->
+  <script>
+    function flipCard() {
+      const container = document.getElementById("flip-container");
+      const wrapper = document.querySelector(".flip-wrapper");
+      container.classList.toggle("flipped");
+      wrapper.classList.toggle("flipped");
+    }
+
+    if (window.location.hash === "#signup") {
+      document.getElementById("flip-container").classList.add("flipped");
+      document.querySelector(".flip-wrapper").classList.add("flipped");
+    }
+  </script>
+
+  <script src="auth.js"></script>
+
+  <script>
+    document.getElementById("googleLoginIcon").addEventListener("click", () => {
+      window.location.href = "/auth/google";
+    });
+  </script>
+</body>
+</html>

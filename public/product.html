@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Details</title>
+  <link rel="stylesheet" href="product.css" />
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Back to Store</a>
+
+  <div class="product-detail-container" id="productDetail">
+    Loading product...
+  </div>
+
+  <script>
+    let currentProduct = null;
+
+    async function loadProductDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        const product = await res.json();
+        currentProduct = product;
+
+        const container = document.getElementById("productDetail");
+        container.innerHTML = `
+          <div class="product-detail-card">
+            <img src="${product.image}" alt="${product.name}" />
+            <div class="info">
+              <h1>${product.name}</h1>
+              <p><strong>₹${product.price}</strong></p>
+              <p>${product.description}</p>
+              <p><strong>Category:</strong> ${product.category}</p>
+              <p><strong>Stock:</strong> ${product.inStock}</p>
+              <div class="actions">
+                <button id="addToCartBtn">Add to Cart</button>
+                <button id="buyNowBtn">Buy Now</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById("addToCartBtn").addEventListener("click", addToCart);
+        document.getElementById("buyNowBtn").addEventListener("click", buyNow);
+      } catch (err) {
+        document.getElementById("productDetail").innerHTML = "Failed to load product.";
+      }
+    }
+
+function addToCart() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first to add items to cart.");
+    window.location.href = "/auth.html";
+    return;
+  }
+
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const existing = cart.find(item => item._id === currentProduct._id);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ ...currentProduct, quantity: 1 });
+  }
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("Product added to cart!");
+}
+
+function buyNow() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first to buy.");
+    window.location.href = "/auth.html";
+    return;
+  }
+
+  addToCart();
+  window.location.href = "/cart.html";
+}
+
+
+    window.addEventListener("load", loadProductDetail);
+  </script>
+</body>
+</html>

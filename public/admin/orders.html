@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Orders</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <aside class="sidebar">
+      <h2>ADMIN</h2>
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html" class="active">Orders</a>
+        <a href="users.html">Users</a>
+        <a href="/auth/logout">Logout</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <h1>📦 All Orders</h1>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>User</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="5">No orders yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <script>
+  fetch('/api/orders')
+    .then(res => res.json())
+    .then(orders => {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '';
+
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="5">No orders found.</td></tr>';
+        return;
+      }
+
+      orders.forEach(order => {
+        const total = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order._id}</td>
+          <td>${order.user?.email || 'Unknown'}</td>
+          <td>${order.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td>
+          <td>₹${total}</td>
+          <td>📦 Processing</td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error("Error fetching orders:", err);
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '<tr><td colspan="5">Failed to load orders.</td></tr>';
+    });
+</script>
+
+</body>
+</html>

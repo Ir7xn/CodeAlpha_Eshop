@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Users</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <aside class="sidebar">
+      <h2>ADMIN</h2>
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="users.html" class="active">Users</a>
+        <a href="#" id="logoutLink">Logout</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <h1>👥 All Users</h1>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="5">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+
+    fetch('/api/users/all', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(users => {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+
+        if (!users.length) {
+          tbody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
+          return;
+        }
+
+        users.forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${user._id}</td>
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td><button class="delete-btn" data-id="${user._id}">🗑️ Delete</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const userId = e.target.dataset.id;
+            if (confirm('Are you sure you want to delete this user?')) {
+              const res = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+              if (res.ok) location.reload();
+              else alert('Failed to delete user.');
+            }
+          });
+        });
+      })
+      .catch(err => {
+        console.error('Failed to fetch users:', err);
+      });
+
+    document.getElementById("logoutLink").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("token");
+      fetch("/api/users/logout")
+        .then(() => window.location.href = "/auth.html")
+        .catch(() => alert("Logout failed"));
+    });
+  </script>
+</body>
+</html>

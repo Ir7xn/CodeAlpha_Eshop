@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>E-Shop | Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="home.css" />
+  <style>
+    /* Extra Styling */
+    .cart-items {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .cart-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1rem;
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+    }
+
+    .cart-card img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .info h3 {
+      margin: 0 0 0.3rem;
+    }
+
+    .info p {
+      margin: 0.2rem 0;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .quantity-controls button {
+      padding: 5px 10px;
+      background-color: #5e35b1;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .remove-btn {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-left: 1rem;
+      cursor: pointer;
+    }
+
+    .summary {
+      text-align: center;
+      margin: 2rem auto;
+    }
+
+    .primary-btn {
+      padding: 10px 20px;
+      background-color: #5e35b1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .primary-btn:hover {
+      background-color: #4527a0;
+    }
+
+    .success-animation {
+      text-align: center;
+      margin-top: 2rem;
+      animation: pop 0.4s ease-in-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.05); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .modal-content input {
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .modal-content button {
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #5e35b1;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #555;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      background: rgba(0,0,0,0.05);
+    }
+
+.order-success-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.checkmark-wrapper {
+  text-align: center;
+}
+
+.checkmark-svg {
+  width: 120px;
+  height: 120px;
+  stroke: #5e35b1;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: none;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 282.6;
+  stroke-dashoffset: 282.6;
+  animation: stroke 0.6s ease-out forwards;
+}
+
+.checkmark-check {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: stroke 0.4s 0.6s ease-out forwards;
+}
+.checkmark-wrapper p {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+@keyframes stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Navbar -->
+  <header>
+    <div class="navbar">
+      <div class="logo">E-Shop</div>
+
+      <div class="search-bar">
+        <input type="text" placeholder="Search disabled on this page" disabled />
+      </div>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="#" class="nav-link active">Cart</a>
+        <a href="myorders.html" class="nav-link">My Orders</a>
+        <a href="#" id="logoutBtn" class="nav-link">Logout</a>
+        <span class="nav-indicator"></span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ✅ Cart Content -->
+  <main>
+    <div id="cart-items" class="cart-items"></div>
+
+    <div class="summary" id="cart-summary">
+      <h2>Total: ₹<span id="total-price">0</span></h2>
+      <button id="place-order" class="primary-btn">Place Order</button>
+      <div id="successMessage" class="success-animation"></div>
+    </div>
+  </main>
+
+<div class="modal" id="addressModal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeAddressModal">×</button>
+
+    <!-- Saved Address Section -->
+    <div id="savedAddressSection" style="display: none;">
+      <h2>Use Saved Address?</h2>
+      <p id="savedAddressText" style="white-space: pre-line; font-size: 0.95rem; color: #333; margin: 10px;"></p>
+      <button id="useSavedBtn" style="margin-right: 20px;">Use This Address</button>
+      <button id="addNewBtn" style="background-color: #ccc; color: #000;">Add New Address</button>
+    </div>
+
+    <!-- New Address Form -->
+    <form id="addressForm" style="display: none;">
+      <h2>Enter Delivery Address</h2>
+      <input type="text" placeholder="Full Name" required id="name" />
+      <input type="text" placeholder="Mobile Number" required id="mobile" />
+      <input type="text" placeholder="Address Line" required id="line" />
+      <input type="text" placeholder="City" required id="city" />
+      <input type="text" placeholder="Pincode" required id="pincode" />
+      <button type="submit">Submit Order</button>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ Smooth SVG Checkmark Animation -->
+<div id="orderSuccessOverlay" class="order-success-overlay">
+  <div class="checkmark-wrapper">
+    <svg class="checkmark-svg" viewBox="0 0 100 100">
+      <circle class="checkmark-circle" cx="50" cy="50" r="45" fill="none" />
+      <path class="checkmark-check" fill="none" d="M30 52 L45 67 L70 37" />
+    </svg>
+    <p>Order Placed Successfully!</p>
+  </div>
+</div>
+
+<audio id="successDing" src="/uploads/ding.mp3" preload="auto"></audio>
+
+
+
+
+
+
+
+  <footer>
+    <p>© 2025 E-Shop. All rights reserved.</p>
+  </footer>
+
+  <!-- ✅ Script -->
+  <script>
+    const links = document.querySelectorAll(".nav-link");
+    const indicator = document.querySelector(".nav-indicator");
+
+    function updateIndicator(el) {
+      const rect = el.getBoundingClientRect();
+      const navRect = el.parentElement.getBoundingClientRect();
+      indicator.style.width = `${rect.width}px`;
+      indicator.style.left = `${rect.left - navRect.left}px`;
+    }
+
+    window.addEventListener("load", () => {
+      const active = document.querySelector(".nav-link.active");
+      if (active) updateIndicator(active);
+      loadCart();
+    });
+
+    window.addEventListener("resize", () => {
+      const active = document.querySelector(".nav-link.active");
+      if (active) updateIndicator(active);
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.href = "auth.html";
+    });
+
+    function loadCart() {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart = cart.map(item => ({ ...item, quantity: item.quantity || 1 }));
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      const container = document.getElementById("cart-items");
+      const totalPriceEl = document.getElementById("total-price");
+      const summary = document.getElementById("cart-summary");
+
+      container.innerHTML = "";
+      summary.style.display = "none";
+
+      if (cart.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>Your cart is empty.</p>";
+        return;
+      }
+
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+
+        const div = document.createElement("div");
+        div.className = "cart-card";
+        div.innerHTML = `
+          <img src="${item.image}" alt="${item.name}" />
+          <div class="info">
+            <h3>${item.name}</h3>
+            <p>Price: ₹${item.price}</p>
+            <p>Subtotal: ₹${itemTotal}</p>
+            <div class="quantity-controls">
+              <button onclick="updateQuantity(${index}, -1)">–</button>
+              <span>${item.quantity}</span>
+              <button onclick="updateQuantity(${index}, 1)">+</button>
+              <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      totalPriceEl.innerText = total;
+      summary.style.display = "block";
+    }
+
+    function updateQuantity(index, change) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart[index].quantity += change;
+      if (cart[index].quantity <= 0) cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    function removeItem(index) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    document.getElementById("place-order").addEventListener("click", () => {
+  const saved = localStorage.getItem("savedAddress");
+  const modal = document.getElementById("addressModal");
+  modal.style.display = "flex";
+
+  if (saved) {
+    document.getElementById("savedAddressSection").style.display = "block";
+    document.getElementById("addressForm").style.display = "none";
+    document.getElementById("savedAddressText").innerText = saved;
+  } else {
+    document.getElementById("savedAddressSection").style.display = "none";
+    document.getElementById("addressForm").style.display = "block";
+  }
+});
+
+document.getElementById("closeAddressModal").addEventListener("click", () => {
+  document.getElementById("addressModal").style.display = "none";
+});
+
+document.getElementById("useSavedBtn").addEventListener("click", () => {
+  const savedAddress = localStorage.getItem("savedAddress");
+  completeOrder(savedAddress);
+  document.getElementById("addressModal").style.display = "none";
+});
+
+document.getElementById("addNewBtn").addEventListener("click", () => {
+  document.getElementById("savedAddressSection").style.display = "none";
+  document.getElementById("addressForm").style.display = "block";
+});
+
+document.getElementById("addressForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const line = document.getElementById("line").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const pincode = document.getElementById("pincode").value.trim();
+
+  const fullAddress = `${name}, ${mobile}\n${line}, ${city} - ${pincode}`;
+  localStorage.setItem("savedAddress", fullAddress); // Save for future
+  completeOrder(fullAddress);
+  document.getElementById("addressModal").style.display = "none";
+});
+
+async function completeOrder(address) {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const token = localStorage.getItem("token");
+  if (!cart.length) return;
+
+  const preparedItems = cart.map(item => ({
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity
+  }));
+
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ address, items: preparedItems })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Something went wrong");
+    }
+
+    const data = await res.json();
+    localStorage.removeItem("cart");
+    loadCart();
+
+
+    // 🎉 Order animation
+    const overlay = document.getElementById("orderSuccessOverlay");
+    overlay.style.display = "flex";
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 3000);
+
+
+    document.getElementById("successMessage").innerHTML =
+      `🎉 Order placed successfully!<br><br><strong>Delivered to:</strong><br>${address.replaceAll("\n", "<br>")}`;
+    document.getElementById("successMessage").style.opacity = 1;
+    
+    setTimeout(() => {
+      document.getElementById("successDing").play();
+    }, 500);
+    setTimeout(() => window.location.href = "index.html", 4000);
+
+
+  } catch (err) {
+    alert("❌ Failed to place order: " + err.message);
+  }
+}
+
+  </script>
+</body>
+</html>

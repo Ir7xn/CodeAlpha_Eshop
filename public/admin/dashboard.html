@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>ADMIN</h2>
+      <nav>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="users.html">Users</a>
+        <a href="#" id="logoutLink">Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>Welcome Admin</h1>
+
+      <div class="form-row">
+        <div class="card">
+          <h3>📦 Products</h3>
+          <p><strong>Total:</strong> <span id="productCount">0</span></p>
+        </div>
+        <div class="card">
+          <h3>👥 Users</h3>
+          <p><strong>Total:</strong> <span id="userCount">0</span></p>
+        </div>
+        <div class="card">
+          <h3>🛒 Orders</h3>
+          <p><strong>Total:</strong> <span id="orderCount">0</span></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    async function loadDashboardStats() {
+      const token = localStorage.getItem('token');
+
+      try {
+        const [productRes, userRes, orderRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/users/all', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
+          fetch('/api/orders', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+        ]);
+
+        const products = await productRes.json();
+        const users = await userRes.json();
+        const orders = await orderRes.json();
+
+        document.getElementById('productCount').textContent = products.length;
+        document.getElementById('userCount').textContent = users.length;
+        document.getElementById('orderCount').textContent = orders.length;
+      } catch (err) {
+        console.error('Failed to load dashboard stats:', err);
+      }
+    }
+
+    loadDashboardStats();
+
+    document.getElementById("logoutLink").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("token");
+      fetch("/api/users/logout")
+        .then(() => window.location.href = "/auth.html")
+        .catch(() => alert("Logout failed"));
+    });
+  </script>
+</body>
+</html>

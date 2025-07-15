@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Products</title>
+  <link rel="stylesheet" href="admin.css" />
+  <style>
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 400px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <aside class="sidebar">
+      <h2>ADMIN</h2>
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="products.html" class="active">Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="users.html">Users</a>
+        <a href="/auth/logout">Logout</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <h1>🛒 Manage Products</h1>
+      <div class="card">
+        <!-- ADD Product Form -->
+        <form id="addProductForm" class="form-row">
+          <input type="text" id="name" placeholder="Name" required />
+          <input type="text" id="image" placeholder="Image URL" />
+          <input type="text" id="category" placeholder="Category" required />
+          <input type="number" id="price" placeholder="Price" required />
+          <input type="number" id="inStock" placeholder="Stock" required />
+          <input type="text" id="description" placeholder="Description" />
+          <button type="submit">Add Product</button>
+        </form>
+
+        <!-- Product Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>Stock</th>
+              <th>Description</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <tr><td colspan="6">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+
+<!-- Edit Product Modal -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Edit Product</h3>
+    <form id="editProductForm">
+      <input type="hidden" id="editProductId" />
+      <input type="text" id="editName" placeholder="Name" required />
+      <input type="text" id="editImage" placeholder="Image URL" />
+      <input type="text" id="editCategory" placeholder="Category" required />
+      <input type="number" id="editPrice" placeholder="Price" required />
+      <input type="number" id="editStock" placeholder="Stock" required />
+      <input type="text" id="editDescription" placeholder="Description" />
+      <button type="submit">Save</button>
+      <button type="button" onclick="closeEditModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+
+
+  <!-- JS Logic -->
+  <script>
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      const tbody = document.getElementById('productTableBody');
+      tbody.innerHTML = '';
+
+      if (!products.length) {
+        tbody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
+        return;
+      }
+
+      products.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${p.name}</td>
+          <td>₹${p.price}</td>
+          <td>${p.category}</td>
+          <td>${p.inStock}</td>
+          <td>${p.description || '-'}</td>
+          <td>
+            <button class="edit-btn" onclick="editProduct('${p._id}')"> Edit</button>
+            <button class="delete-btn" onclick="deleteProduct('${p._id}')"> Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm("Are you sure you want to delete?")) return;
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      if (res.ok) loadProducts();
+      else alert("Failed to delete product.");
+    }
+
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const product = {
+        name: document.getElementById('name').value,
+        image: document.getElementById('image').value,
+        category: document.getElementById('category').value,
+        price: parseFloat(document.getElementById('price').value),
+        inStock: parseInt(document.getElementById('inStock').value),
+        description: document.getElementById('description').value
+      };
+
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+
+      if (res.ok) {
+        alert("✅ Product added!");
+        document.getElementById('addProductForm').reset();
+        loadProducts();
+      } else {
+        const data = await res.json();
+        alert("❌ Failed to add product: " + (data.message || "Unknown error"));
+      }
+    });
+
+    // Edit logic
+    function editProduct(id) {
+      fetch(`/api/products/${id}`)
+        .then(res => res.json())
+        .then(product => {
+          document.getElementById("editName").value = product.name;
+          document.getElementById("editCategory").value = product.category;
+          document.getElementById("editPrice").value = product.price;
+          document.getElementById("editStock").value = product.inStock;
+          document.getElementById("editDescription").value = product.description || "";
+          document.getElementById("editProductId").value = product._id;
+          document.getElementById("editModal").classList.remove("hidden");
+        })
+        .catch(() => alert("Failed to load product"));
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.add("hidden");
+    }
+
+    document.getElementById("editProductForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("editProductId").value;
+      const updated = {
+        name: document.getElementById("editName").value,
+        category: document.getElementById("editCategory").value,
+        price: parseFloat(document.getElementById("editPrice").value),
+        inStock: parseInt(document.getElementById("editStock").value),
+        description: document.getElementById("editDescription").value,
+      };
+
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated)
+      });
+
+      if (res.ok) {
+        closeEditModal();
+        loadProducts();
+      } else {
+        alert("Failed to update product");
+      }
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
