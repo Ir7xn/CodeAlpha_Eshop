@@ -5,7 +5,7 @@ An Basic Yet end-to-end E-commerce platform where users can browse products, add
 Note: This project is designed for desktop use only. After authentication, users and admins are redirected to their respective dashboards.
 
 
-[**🛒 Visit E-Shop**](https://codealpha-eshop.onrender.com/)
+[**🛒 Visit E-Shop**](https://codealpha-eshop.onrender.com/auth.html)
 
 Admin Credentials:
 
